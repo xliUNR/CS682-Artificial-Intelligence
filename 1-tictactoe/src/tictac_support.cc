@@ -14,9 +14,9 @@ int load_board( std::string filename, int board[][3] )
 			for( int j = 0; j < 3; j++ )
 			{
 				bfile >> board[i][j];
-				printf ("%d ", board[i][j] );
+				//printf ("%d ", board[i][j] );
 			}
-			printf ("\n");
+			//printf ("\n");
 		}
 
 		bfile.close();
