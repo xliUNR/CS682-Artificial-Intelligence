@@ -8,7 +8,7 @@ Create a tic-tac-toe move-maker program. I've given you some skeleton file I/O c
 ## to compile
 
 ```
-mkdir build
+mkdir build && cd build
 cmake ..
 make
 ```
