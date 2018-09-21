@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <iomanip>      // std::setw
 
 int load_board( std::string filename, int board[][3] )
 {
@@ -40,8 +41,9 @@ int save_board( std::string filename, int board[][3] )
 		{
 			for( int j = 0; j < 3; j++ )
 			{
+				bfile << std::setw(5);
 				bfile << board[i][j];
-				bfile << " ";
+				//bfile << " ";
 			}
 			bfile << std::endl;
 		}
