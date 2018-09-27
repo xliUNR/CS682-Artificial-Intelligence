@@ -44,3 +44,45 @@ int make_move( int board[][3] )
 	// no move was made (board was full)
 	return 0;
 }
+
+int make_move( iint board[][3] )
+{
+	// figure out what move it is
+	int state = 0;
+	for( int i = 0; i < 3; i++ )
+		for( int j = 0; j < 3; j++ )
+			state += board[i][j];
+
+    if( state == 0 )
+        {
+           //X turn
+           //loop over all empty spots and call recursive function to evaluate
+           for( int i = 0; i < 3; i++ )
+              for( int j = 0; j < 3; j++ )
+                  //find an empty square
+                 if( board[i][j] == 0 ) 
+                    {
+                        board[i][j] = 1;
+                        //recursive call
+                        
+                    }
+        }
+
+    else if ( state == 1 )
+        {
+            for( int i =0; i < 3; i++ )
+                for( int j = 0; j < 3; j++ )
+                    {
+                        if( board[i][j] == 0 )
+                            {
+                                board[i][k] = -1;
+                                //recursive call
+                            }
+                    }
+        }
+
+}
+
+
+
+
