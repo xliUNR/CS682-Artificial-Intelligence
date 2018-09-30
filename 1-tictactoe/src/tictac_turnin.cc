@@ -53,9 +53,12 @@ int make_move( int board[][3] )
     int r1, r2, r3, c1, c2, c3, dL, dR;
     int winCon = -2;
     int pieceVal = -1;
+    int tempBoard[3][3];
     int movesList[3][3];
+    int emptyCtr;
     int optRow, optCol;
     int optVal;
+
     //loop over board to determine whose turn it is
 	for( int i = 0; i < 3; i++ )
 		for( int j = 0; j < 3; j++ )
@@ -145,33 +148,37 @@ int make_move( int board[][3] )
         }
     }
     //If no win con available, check for empty spots on board
-    else{
-           if( state == 0 ){          
-              for( int i = 0; i < 3; i++ ){
-                  for( int j = 0; j < 3; j++ ){
-                     //fill rest of moves list w/ zeros
-                     movesList[i*3+j] = 0;
-                     if( board[i][j] == 0 ){
-                        board[i][j] = pieceVal;
-                        //store values of each move into matrix
-                        movesList[i*3+j] = make_move( board );
-                        
-                        
-                        board[i][j] == 0;
-                     }
+    else{ 
+           emptyCtr = 0;           
+           for( int i = 0; i < 3; i++ ){
+               for( int j = 0; j < 3; j++ ){
+                  //fill moves list w/ zeros
+                  movesList[i*3+j] = 0;
+                  if( board[i][j] == 0 ){
+                     board[i][j] = pieceVal;
+                     //store values of each move into matrix
+                     movesList[i][j] = make_move( board );
+                     emptyCtr++;
+                     board[i][j] == 0;
                   }
                }
-               //figure out the max or min depending on whose turn
-               optVal = movesList[0][0];
-               optRow = 0;
-               optCol = 0;
-               /*for( int k = 1; k < 9; k++ ){
-                  if( optVal < movesList[k] ){
-                        optVal = movesList[k];
-                              optIndex = k;
-                  }
-               }*/
+            }
+            //if no spots on board return 0 for tie
+            if ( emptyCtr == 0 )
+               return 0;
 
+            //figure out the max or min depending on whose turn
+            optVal = movesList[0][0];
+            optRow = 0;
+            optCol = 0;
+            //if x turn, then find Max
+            if( state == 0 ){
+            /*for( int k = 1; k < 9; k++ ){
+               if( optVal < movesList[k] ){
+                     optVal = movesList[k];
+                           optIndex = k;
+               }
+            }*/
                for( int k = 0; k < 3; k++ ){
                   for( int l = 0; l < 3; l++ ){
                      if( optVal < movesList[k][l] ){
@@ -180,42 +187,120 @@ int make_move( int board[][3] )
                         optCol = l;
                      }
                   }
-               }
-               board[optRow][optCol] = pieceVal; 
+               } 
             }
-
+            //Otherwise it is O turn so look for min
+            else{
+               for( int k = 0; k < 3; k++ ){
+                  for( int l = 0; l < 3; l++ ){
+                     if( optVal > movesList[k][l] ){
+                        optVal = movesList[k][l];
+                        optRow = k;
+                        optCol = l;
+                     }
+                  }
+               } 
+            }
+         board[optRow][optCol] = pieceVal; 
     }
-    if( state == 0 )
-        {
-           //X turn
-           //loop over all empty spots and call recursive function to evaluate
-           for( int i = 0; i < 3; i++ )
-              for( int j = 0; j < 3; j++ )
-                  //find an empty square
-                 if( board[i][j] == 0 ) 
-                    {
-                        board[i][j] = 1;
-                        //recursive call
-                        a = make_move( board );
-                        board[i][j] = 0;
-                    }
-        }
-
-    else if ( state == 1 )
-        {
-            for( int i =0; i < 3; i++ )
-                for( int j = 0; j < 3; j++ )
-                    {
-                        if( board[i][j] == 0 )
-                            {
-                                board[i][k] = -1;
-                                //recursive call
-                            }
-                    }
-        }
-
 }
 
 
+int make_moveHelper( board[][] ){
 
+}
+
+int checkWin( board[][], int turn ){
+   int r1, r2, r3, c1, c2, c3, dL, dR;
+   int winCon = -2;
+   int pieceVal = -1;
+   //if turn = 0, then it is x turn
+   if( turn == 0 ){
+      winCon = 2;
+      pieceVal = 1;
+   }
+   //calculate values of rows, columns, and diagonals
+    r1 = board[0][0] + board[0][1] + board[0][2];
+    r2 = board[1][0] + board[1][1] + board[1][2];
+    r3 = board[2][0] + board[2][1] + board[2][2];  
+    c1 = board[0][0] + board[1][0] + board[1][0];
+    c2 = board[0][1] + board[1][1] + board[2][1];
+    c3 = board[0][2] + board[1][2] + board[2][2];
+    dL = board[0][0] + board[1][1] + board[2][2];
+    dR = board[0][2] + board[1][1] + board[2][0];
+
+   //check for win conditions
+   if( r1 == winCon ){
+        //see which one is empty and place piece there.
+        for( int i = 0; i < 3; i++){
+            if( board[0][i] == 0 )
+                board[0][i] == pieceVal;
+            return pieceVal; 
+        }
+    } 
+
+    else if( r2 == winCon ){
+        for( int i = 0; i < 3; i++ ){
+            if( board[1][i] == 0 )
+                board[1][i] == pieceVal;
+            return pieceVal; 
+        }
+    }
+
+    else if( r3 == winCon ){
+        for( int i = 0; i < 3; i++ ){
+            if( board[2][i] == 0 )
+                board[2][i] == pieceVal;
+            return pieceVal; 
+        }
+    }
+
+    else if( c1 == winCon ){
+        for( int i = 0; i < 3; i++ ){
+            if( board[i][0] == 0 )
+                board[i][0] == pieceVal;
+            return pieceVal; 
+        }
+    }
+    else if( c2 == winCon ){
+        for( int i = 0; i < 3; i++ ){
+            if( board[i][1] == 0 )
+                board[i][1] == pieceVal;
+            return pieceVal; 
+        }
+    }
+    else if( c3 == winCon ){
+        for( int i = 0; i < 3; i++ ){
+            if( board[i][2] == 0 )
+                board[i][2] == pieceVal;
+            return pieceVal; 
+        }
+    }
+    else if( dL == winCon ){
+        for( int i = 0; i < 3; i++ ){
+            if( board[i][i] == 0 )
+                board[i][i] == pieceVal;
+            return pieceVal; 
+        }
+    }
+    else if( dR == winCon ){
+        if( board[0][2] == 0 ){
+            board[0][2] == pieceVal;
+            return pieceVal;
+        }
+        else if( board[1][1] == 0 ){
+            board[1][1] == pieceVal;
+            return pieceVal;
+        }
+        else{
+            board[2][0] = pieceVal;
+            return pieceVal;
+        }
+    }
+    //If no win conditions found, return 0
+    else{
+      return 0;
+    }
+
+}
 
