@@ -55,9 +55,17 @@ int make_move( int board[][3] )
     int pieceVal = -1;
     int tempBoard[3][3];
     int movesList[3][3];
+    int movesInitVal = 3;
     int emptyCtr;
     int optRow, optCol;
     int optVal;
+    //initialize matrices on heap
+    /*int** tempBoard = new int*[3];
+    int** movesList = new int*[3];
+    for( int i = 0; i < 3; i++ ){
+      tempBoard[i] = new int[3];
+      movesList = new int[3];
+    }*/
 
     //loop over board to determine whose turn it is
 	for( int i = 0; i < 3; i++ )
@@ -67,6 +75,7 @@ int make_move( int board[][3] )
     if( state == 0 ){
         winCon = 2;
         pieceVal = 1;
+        movesInitVal = -3;
     }
 
     //calculate values of rows, columns, and diagonals
@@ -149,17 +158,27 @@ int make_move( int board[][3] )
     }
     //If no win con available, check for empty spots on board
     else{ 
-           emptyCtr = 0;           
+           //first copy board into temp board
            for( int i = 0; i < 3; i++ ){
                for( int j = 0; j < 3; j++ ){
-                  //fill moves list w/ zeros
-                  movesList[i*3+j] = 0;
-                  if( board[i][j] == 0 ){
-                     board[i][j] = pieceVal;
+                  tempBoard[i][j] = board[i][j];
+               }
+            }
+           //intialize counter for number of empty spots
+           emptyCtr = 0; 
+           //loop over all empty spots, test outcome of each          
+           for( int i = 0; i < 3; i++ ){
+               for( int j = 0; j < 3; j++ ){
+                  //Or copy tempBoard from board @ each iteration?
+                  //initialize movesList
+                  movesList[i][j] = movesInitVal;
+                  if( tempBoard[i][j] == 0 ){
+                     tempBoard[i][j] = pieceVal;
                      //store values of each move into matrix
-                     movesList[i][j] = make_move( board );
+                     movesList[i][j] = make_move( tempBoard );
                      emptyCtr++;
-                     board[i][j] == 0;
+                     //recopy board here?
+                     tempBoard[i][j] == 0;
                   }
                }
             }
@@ -201,7 +220,8 @@ int make_move( int board[][3] )
                   }
                } 
             }
-         board[optRow][optCol] = pieceVal; 
+         board[optRow][optCol] = pieceVal;
+         return optVal; 
     }
 }
 
