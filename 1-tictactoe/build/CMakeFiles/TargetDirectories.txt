@@ -1,0 +1,3 @@
+/home/xl/git-repos/cs482-fall2018/1-tictactoe/build/CMakeFiles/edit_cache.dir
+/home/xl/git-repos/cs482-fall2018/1-tictactoe/build/CMakeFiles/rebuild_cache.dir
+/home/xl/git-repos/cs482-fall2018/1-tictactoe/build/CMakeFiles/tictactoe.dir
