@@ -1,7 +1,8 @@
 #include <tictac_support.h>
 #include <stdio.h>
+#include <iostream>
 //free function declaration
-int minimaxHelper( int board[][], int turn );
+int minimaxHelper( int board[][3], int turn );
 
 /**
 	make_move: takes a board state and makes a legal 
@@ -77,7 +78,7 @@ int make_move( int board[][3] )
 	for( int i = 0; i < 3; i++ )
 		for( int j = 0; j < 3; j++ )
 			state += board[i][j];
-    
+    //std::cout << state << ' ';
     //If state = 0, means it is X turn
     if( state == 0 ){
         winCon = 2;
@@ -92,12 +93,12 @@ int make_move( int board[][3] )
     r1 = board[0][0] + board[0][1] + board[0][2];
     r2 = board[1][0] + board[1][1] + board[1][2];
     r3 = board[2][0] + board[2][1] + board[2][2];  
-    c1 = board[0][0] + board[1][0] + board[1][0];
+    c1 = board[0][0] + board[1][0] + board[2][0];
     c2 = board[0][1] + board[1][1] + board[2][1];
     c3 = board[0][2] + board[1][2] + board[2][2];
     dL = board[0][0] + board[1][1] + board[2][2];
     dR = board[0][2] + board[1][1] + board[2][0];
-
+    //std::cout << r1 << ' ' << r2 << ' ' << r3 << ' ' << c1 << ' ' << c2 << ' ' << c3 << ' ' << dL << ' ' << dR << std::endl;
     //check to see if instant win is possible before running minimax
     if( r1 == winCon ){
         //see which one is empty and place piece there.
@@ -180,14 +181,30 @@ int make_move( int board[][3] )
            //loop over all empty spots, test outcome of each          
            for( int i = 0; i < 3; i++ ){
                for( int j = 0; j < 3; j++ ){
-                  //Or copy tempBoard from board @ each iteration?
                   //initialize movesList
                   movesList[i][j] = movesInitVal;
+                  //std::cout << board[i][j];
                   if( board[i][j] == 0 ){
+                     //std::cout << "row: "<< i << ' ' << "col:" << j <<' ';
                      emptyCtr++;
+                     board[i][j] = pieceVal;
+
+                     /*for( int k = 0; k < 3; k++ ){
+                        for( int l = 0; l < 3; l++ ){
+                          std::cout << board[k][l]; 
+                        }
+                      }*/
                      movesList[i][j] = minimaxHelper( board, nextTurn );
+                     //std::cout << "Move value: " << movesList[i][j]<< ' ';
+                     //std::cout << "Right after call " << std::endl;
+                     /*for( int k = 0; k < 3; k++ ){
+                        for( int l = 0; l < 3; l++ ){
+                          std::cout << board[k][l]; 
+                        }
+                      }*/
                      //reset board before next iteration
                      board[i][j] = 0;
+
                      /*if( tempBoard[i][j] == 0 ){
                         tempBoard[i][j] = pieceVal;
                         //store values of each move into matrix
@@ -244,21 +261,26 @@ int make_move( int board[][3] )
 }
 
 //recursion helper function
-int minimaxHelper( int board[][], int turn ){
+int minimaxHelper( int board[][3], int turn ){
    int r1, r2, r3, c1, c2, c3, dL, dR;
    int winCon = -2;
    int pieceVal = -1;
    int movesInitVal = 3;
-   int winsList[7];
+   int winsList[8];
    int movesList[3][3];
    int nextTurn = 0;
    int optVal;
-
+   //std::cout << "hello from helper";
   /*//loop over board to determine whose turn it is
    for( int i = 0; i < 3; i++ )
      for( int j = 0; j < 3; j++ )
        state += board[i][j];*/
-    
+  //std::cout << "H: ";
+  /*for( int i = 0; i < 3; i++ )
+    for( int j = 0; j < 3; j++ )
+      std::cout << board[i][j];*/ 
+
+  //std::cout << "  ";
    if( turn == 0 ){
        winCon = 2;
        pieceVal = 1;
@@ -269,14 +291,16 @@ int minimaxHelper( int board[][], int turn ){
    winsList[0] = board[0][0] + board[0][1] + board[0][2];
    winsList[1] = board[1][0] + board[1][1] + board[1][2];
    winsList[2] = board[2][0] + board[2][1] + board[2][2];
-   winsList[3] = board[0][0] + board[1][0] + board[1][0];
+   winsList[3] = board[0][0] + board[1][0] + board[2][0];
    winsList[4] = board[0][1] + board[1][1] + board[2][1];
-   winsList[5] = board[0][0] + board[1][1] + board[2][2];
-   winsList[6] = board[0][2] + board[1][1] + board[2][0];
+   winsList[5] = board[0][2] + board[1][2] + board[2][2];
+   winsList[6] = board[0][0] + board[1][1] + board[2][2];
+   winsList[7] = board[0][2] + board[1][1] + board[2][0];
 
   //loop over win states and see if any leads to win 
-   for( int i = 0; i < 7; i++ ){
+   for( int i = 0; i < 8; i++ ){
       if ( winsList[i] == winCon ){
+        //std::cout << "hello from winstate in helper" << std::endl;
         return pieceVal;
       }
    }
@@ -289,25 +313,42 @@ int minimaxHelper( int board[][], int turn ){
          } 
       }
    } 
-   if( emptyCtr == 0 )
+   //std::cout << ' ' << "emptyCtr = " << emptyCtr << ' ';
+   if( emptyCtr == 0 ){
+      //std::cout << " Is empty" << ' ';
       return 0;
+   }
 
   //If no win state found, then minimax
+    //std::cout << "right before recursion" << std::endl;
    for(int i = 0; i < 3; i++ ){
+      //std::cout << "outer loop";
       for( int j = 0; j < 3; j++ ){
+         //std::cout << "inner loop";
          movesList[i][j] = movesInitVal;
-         if( board[i][j] = 0 ){
-            board[i][j] = pieceVal;
+
+         if( board[i][j] == 0 ){
+          //std::cout << "rowi: "<< i << ' ' << "coli:" << j <<' ';
+          //std::cout << "hello from inside helper";
+            board[i][j] = pieceVal; 
+            //std::cout << "Hello right before minimaxhelper recurse" << std::endl;
             movesList[i][j] = minimaxHelper( board, nextTurn );
             board[i][j] = 0;
          }
       }
    }
+
+   /*for( int k = 0; k <3; k++){
+              for( int l = 0; l <3; l++){
+                std::cout << board[k][l];
+              }
+            }
+            std::cout << "  ";*/
   //maximize out of set of moves
   //figure out the max or min depending on whose turn
    optVal = movesList[0][0];
-   optRow = 0;
-   optCol = 0;
+   //optRow = 0;
+   //optCol = 0;
    //if x turn, then find Max
    if( turn == 0 ){
       for( int k = 0; k < 3; k++ ){
