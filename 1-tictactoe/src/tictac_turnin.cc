@@ -1,5 +1,8 @@
 #include <tictac_support.h>
 #include <stdio.h>
+//free function declaration
+int minimaxHelper( int board[][], int turn );
+
 /**
 	make_move: takes a board state and makes a legal 
 	(hopefully optimal) move
@@ -17,7 +20,7 @@
 		(current implementation returns 1 by default, 0 if no move made)
 **/
 
-int make_move( int board[][3] )
+/*int make_move( int board[][3] )
 {
 	// figure out what move it is
 	int state = 0;
@@ -43,17 +46,20 @@ int make_move( int board[][3] )
 	
 	// no move was made (board was full)
 	return 0;
-}
+}*/
 
 int make_move( int board[][3] )
 {
-	// figure out what move it is
-	int state = 0;
+	  //variable to store game state (whose turn it is)
+	  int state = 0;
     //variables for sum of rows, columns, and diagonals.
     int r1, r2, r3, c1, c2, c3, dL, dR;
     int winCon = -2;
     int pieceVal = -1;
-    int tempBoard[3][3];
+    int nextTurn = 0;
+    int gameOver = -100;
+    int tieGame = 101;
+    //int tempBoard[3][3];
     int movesList[3][3];
     int movesInitVal = 3;
     int emptyCtr;
@@ -72,13 +78,17 @@ int make_move( int board[][3] )
 		for( int j = 0; j < 3; j++ )
 			state += board[i][j];
     
+    //If state = 0, means it is X turn
     if( state == 0 ){
         winCon = 2;
         pieceVal = 1;
         movesInitVal = -3;
+        gameOver = 100;
+        nextTurn = -1;
     }
 
-    //calculate values of rows, columns, and diagonals
+    //calculate values of rows, columns, and diagonals to check for next move
+    //wins
     r1 = board[0][0] + board[0][1] + board[0][2];
     r2 = board[1][0] + board[1][1] + board[1][2];
     r3 = board[2][0] + board[2][1] + board[2][2];  
@@ -94,7 +104,7 @@ int make_move( int board[][3] )
         for( int i = 0; i < 3; i++){
             if( board[0][i] == 0 )
                 board[0][i] == pieceVal;
-            return pieceVal; 
+            return gameOver; 
         }
     } 
 
@@ -102,7 +112,7 @@ int make_move( int board[][3] )
         for( int i = 0; i < 3; i++ ){
             if( board[1][i] == 0 )
                 board[1][i] == pieceVal;
-            return pieceVal; 
+            return gameOver; 
         }
     }
 
@@ -110,7 +120,7 @@ int make_move( int board[][3] )
         for( int i = 0; i < 3; i++ ){
             if( board[2][i] == 0 )
                 board[2][i] == pieceVal;
-            return pieceVal; 
+            return gameOver; 
         }
     }
 
@@ -118,52 +128,53 @@ int make_move( int board[][3] )
         for( int i = 0; i < 3; i++ ){
             if( board[i][0] == 0 )
                 board[i][0] == pieceVal;
-            return pieceVal; 
+            return gameOver; 
         }
     }
     else if( c2 == winCon ){
         for( int i = 0; i < 3; i++ ){
             if( board[i][1] == 0 )
                 board[i][1] == pieceVal;
-            return pieceVal; 
+            return gameOver; 
         }
     }
     else if( c3 == winCon ){
         for( int i = 0; i < 3; i++ ){
             if( board[i][2] == 0 )
                 board[i][2] == pieceVal;
-            return pieceVal; 
+            return gameOver; 
         }
     }
     else if( dL == winCon ){
         for( int i = 0; i < 3; i++ ){
             if( board[i][i] == 0 )
                 board[i][i] == pieceVal;
-            return pieceVal; 
+            return gameOver; 
         }
     }
     else if( dR == winCon ){
         if( board[0][2] == 0 ){
             board[0][2] == pieceVal;
-            return pieceVal;
+            return gameOver;
         }
         else if( board[1][1] == 0 ){
             board[1][1] == pieceVal;
-            return pieceVal;
+            return gameOver;
         }
         else{
             board[2][0] = pieceVal;
-            return pieceVal;
+            return gameOver;
         }
     }
     //If no win con available, check for empty spots on board
     else{ 
-           //first copy board into temp board
+           /*//first copy board into temp board
            for( int i = 0; i < 3; i++ ){
                for( int j = 0; j < 3; j++ ){
                   tempBoard[i][j] = board[i][j];
                }
-            }
+            }*/
+
            //intialize counter for number of empty spots
            emptyCtr = 0; 
            //loop over all empty spots, test outcome of each          
@@ -172,19 +183,25 @@ int make_move( int board[][3] )
                   //Or copy tempBoard from board @ each iteration?
                   //initialize movesList
                   movesList[i][j] = movesInitVal;
-                  if( tempBoard[i][j] == 0 ){
-                     tempBoard[i][j] = pieceVal;
-                     //store values of each move into matrix
-                     movesList[i][j] = make_move( tempBoard );
+                  if( board[i][j] == 0 ){
                      emptyCtr++;
-                     //recopy board here?
-                     tempBoard[i][j] == 0;
+                     movesList[i][j] = minimaxHelper( board, nextTurn );
+                     //reset board before next iteration
+                     board[i][j] = 0;
+                     /*if( tempBoard[i][j] == 0 ){
+                        tempBoard[i][j] = pieceVal;
+                        //store values of each move into matrix
+                        movesList[i][j] = minimaxHelper( tempBoard, nextTurn );
+                        emptyCtr++;
+                        //recopy board here?
+                        tempBoard[i][j] == 0;
+                     }*/
                   }
-               }
+               } 
             }
             //if no spots on board return 0 for tie
             if ( emptyCtr == 0 )
-               return 0;
+               return tieGame;
 
             //figure out the max or min depending on whose turn
             optVal = movesList[0][0];
@@ -221,16 +238,105 @@ int make_move( int board[][3] )
                } 
             }
          board[optRow][optCol] = pieceVal;
-         return optVal; 
+         //can return anything
+         return 0; 
     }
 }
 
+//recursion helper function
+int minimaxHelper( int board[][], int turn ){
+   int r1, r2, r3, c1, c2, c3, dL, dR;
+   int winCon = -2;
+   int pieceVal = -1;
+   int movesInitVal = 3;
+   int winsList[7];
+   int movesList[3][3];
+   int nextTurn = 0;
+   int optVal;
 
-int make_moveHelper( board[][] ){
+  /*//loop over board to determine whose turn it is
+   for( int i = 0; i < 3; i++ )
+     for( int j = 0; j < 3; j++ )
+       state += board[i][j];*/
+    
+   if( turn == 0 ){
+       winCon = 2;
+       pieceVal = 1;
+       movesInitVal = -3;
+       nextTurn = -1;
+   }
+  //calculate values of rows, columns, and diagonals
+   winsList[0] = board[0][0] + board[0][1] + board[0][2];
+   winsList[1] = board[1][0] + board[1][1] + board[1][2];
+   winsList[2] = board[2][0] + board[2][1] + board[2][2];
+   winsList[3] = board[0][0] + board[1][0] + board[1][0];
+   winsList[4] = board[0][1] + board[1][1] + board[2][1];
+   winsList[5] = board[0][0] + board[1][1] + board[2][2];
+   winsList[6] = board[0][2] + board[1][1] + board[2][0];
 
+  //loop over win states and see if any leads to win 
+   for( int i = 0; i < 7; i++ ){
+      if ( winsList[i] == winCon ){
+        return pieceVal;
+      }
+   }
+  //check if board is tie, aka no possible moves left
+   int emptyCtr = 0; 
+   for( int i = 0; i < 3; i++ ){
+      for( int j = 0; j < 3; j++ ){
+         if( board[i][j] == 0 ){
+            emptyCtr++;   
+         } 
+      }
+   } 
+   if( emptyCtr == 0 )
+      return 0;
+
+  //If no win state found, then minimax
+   for(int i = 0; i < 3; i++ ){
+      for( int j = 0; j < 3; j++ ){
+         movesList[i][j] = movesInitVal;
+         if( board[i][j] = 0 ){
+            board[i][j] = pieceVal;
+            movesList[i][j] = minimaxHelper( board, nextTurn );
+            board[i][j] = 0;
+         }
+      }
+   }
+  //maximize out of set of moves
+  //figure out the max or min depending on whose turn
+   optVal = movesList[0][0];
+   optRow = 0;
+   optCol = 0;
+   //if x turn, then find Max
+   if( turn == 0 ){
+      for( int k = 0; k < 3; k++ ){
+         for( int l = 0; l < 3; l++ ){
+            if( optVal < movesList[k][l] ){
+               optVal = movesList[k][l];
+               //optRow = k;
+               //optCol = l;
+            }
+         }
+      } 
+   }
+
+  //Otherwise it is O's turn so look for min
+   else{
+      for( int k = 0; k < 3; k++ ){
+         for( int l = 0; l < 3; l++ ){
+            if( optVal > movesList[k][l] ){
+               optVal = movesList[k][l];
+               //optRow = k;
+               //optCol = l;
+            }
+         }
+      } 
+   }
+   return optVal; 
 }
 
-int checkWin( board[][], int turn ){
+/*int checkWin( board[][], int turn ){
    int r1, r2, r3, c1, c2, c3, dL, dR;
    int winCon = -2;
    int pieceVal = -1;
@@ -322,5 +428,6 @@ int checkWin( board[][], int turn ){
       return 0;
     }
 
-}
+}*/
+
 
