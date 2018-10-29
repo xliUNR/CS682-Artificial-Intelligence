@@ -12,3 +12,7 @@ mkdir build && cd build
 cmake ..
 make
 ```
+
+# project 2
+
+Create spam filter using niave Bayes classifier to give sms either ham or spam classification
