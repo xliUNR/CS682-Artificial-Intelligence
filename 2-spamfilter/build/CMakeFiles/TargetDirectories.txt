@@ -1,0 +1,4 @@
+/home/xl/git-repos/cs482-fall2018/2-spamfilter/build/CMakeFiles/edit_cache.dir
+/home/xl/git-repos/cs482-fall2018/2-spamfilter/build/CMakeFiles/rebuild_cache.dir
+/home/xl/git-repos/cs482-fall2018/2-spamfilter/build/CMakeFiles/training.dir
+/home/xl/git-repos/cs482-fall2018/2-spamfilter/build/CMakeFiles/classify.dir

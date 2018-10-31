@@ -1,0 +1,1 @@
+/usr/bin/c++      CMakeFiles/training.dir/home/xl/git-repos/cs482-fall2018/2-spamfilter/src/training.cc.o  -o training -rdynamic 
