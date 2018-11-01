@@ -4,6 +4,7 @@
 //
 #include <cstdlib>
 #include <stdio.h>
+#include <ctype.h>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -19,14 +20,15 @@ int main(int argc, char const *argv[])
    char outSpam[20];
    char outHam[20];
    char tempString[100];
-   char tempString2[100]; 
-   //string inFile, outSpam, outHam;
-   //string tempString, tempString2;
+   char junkString[100]; 
+   char tempChar;
+   int charIndex = 0;
+   bool hamFlag;
    ifstream fin;
    ofstream fout;
-   map <char*, int> spamMap;
-   map <char*, int> hamMap;
-   
+   map <string, int> spamMap;
+   map <string, int> hamMap;
+   string mapStr;
    //Parse command line arguments
    for(int i = 1; i < argc; i++)
       {
@@ -48,46 +50,84 @@ int main(int argc, char const *argv[])
        cout << "File open failed!";
        exit( EXIT_FAILURE );
      }
-   fin >> tempString;
-   //cout << tempString;
-   char* tempString3;
-   size_t len;
-   //getdelim(&tempString, &len, ',', fin );
-   //getline(fin, tempString);
-   //fin >> tempString;
-   //tempString3 = strtok( tempString, ",\"");
-   //cout << tempString3;
-   //fin.get(tempString,200, ',');
-   //fin.get(tempString2, 200,',');
-   //fin >> tempString;
-   //getdelim(&tempString, 
-   //cout << tempString << endl;
-   //cout << tempString3;
-   //fin >> tempString;
-   //cout << tempString2 << endl;
-   for( int i = 0; i < 5; i++){
-       fin >> tempString;
-       cout << "tempString: " << tempString << endl;
-       tempString3 = strtok( tempString, ",.\"");
-       cout << "tempString3: " << tempString3 << endl;
-       tempString3 = strtok( NULL, ",.\"");
 
-       cout << tempString3 << endl;
-    }
+   //Ignore first line
+   fin >> junkString;
+    
+   //initialize empty string
+   tempString[0] = '\0';
+   //loop and read character until end of file is reached
+   while( fin.get(tempChar) ){
+     //cout << " Input Char: " << tempChar << endl ;
+     //test to see if alphanumberic or an apostrophe  
+     if( isalnum( tempChar ) || tempChar == '\''){
+       //copy into temporary string if so and advance iterator  
+       tempString[ charIndex ] = tempChar;
+       charIndex++;
+     } 
+     //otherwise it reached a delimeter between words
+     else{
+       //put terminating character into tempString
+       tempString[ charIndex ] = '\0'; 
+        //cout << "Word is: " << tempString << ' ';
+       //if word stored is ham, then set flag to add to ham map  
+       if( strcmp( tempString, "ham" ) == 0 ){
+          //cout << "Word is ham!" << endl; 
+          hamFlag = true;
+       }
+       //if word is spam, then set flag to false to add to spam map
+       else if( strcmp( tempString, "spam" ) == 0 ){
+          //cout << "Word is spam!" << endl;
+          hamFlag = false;
+       }
+       //not ham or spam so must be a word to add to maps
+       //need to check for empty string.
+       else{
+          
+          if( hamFlag && tempString[0] != '\0' ){
+              //add word to ham map
+            //cout << "word added: " << tempString << endl;
+            mapStr = tempString;
+            hamMap[ mapStr ]++;
+          }
+          else if( !hamFlag && tempString[0] != '\0' ){
+              //add word to spam map
+            //cout << "word added: " << tempString << endl;
+            mapStr = tempString;
+            spamMap[ mapStr ]++;
+          }
+       }   
 
-   //Read in line by line and parse each word. 
-   //loop over all words in input file
-   //read in lines until next line
-   //loop over all words in sms 
-   //Compare first word, check if word == spam or ham and put into array
-   /*if( tempWord == "ham")
-      {
-        ctr = hamWords[ tempWord ] 
-   */
-   //update counter
+       //reset charIndex and tempString
+       charIndex = 0;
+       tempString[0] = '\0';    
+     }
+   }
+   //close file stream
+   fin.close();
+   cout << endl << "Size of ham map: " << hamMap.size();
+   cout << endl << "Size of spam map: " << spamMap.size();
+   
+   //output ham file
+   fout.open( outHam, fstream::out );
+   //print out number of ham words
+   fout << hamMap.size() << '\n';
+   //loop over and print values of map
+   for( map<string,int>::iterator it=hamMap.begin(); it!=hamMap.end(); ++it ){
+     fout << it->first << ' ' << it->second << '\n';
+   }
 
-   //print output file
-   //One for ham one for spam number of words.
+   fout.close();
+
+   //output spam file
+   fout.open( outSpam, fstream::out );
+   //print out number of spam words
+   fout << spamMap.size() << '\n';
+    //loop over and print values of map
+    for( map<string,int>::iterator it=spamMap.begin(); it!=spamMap.end(); ++it ){
+     fout << it->first << ' ' << it->second << '\n';
+   }
+   fout.close();
 
    return 0;
 }
