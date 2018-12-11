@@ -10,6 +10,15 @@ import gym
 #import gym.scoreboard.scoring
 from gym import wrappers, logger
 
+#Global variables
+OUTOFBOUNDSTATE = -1; 
+X_MAX = 0.6
+X_MIN = -1.2
+X_RANGE = 1.8; 
+
+XDOT_MAX = 0.7
+XDOT_MIN = -0.7
+XDOT_RANGE = 1.4 
 
 ################################################
 # CS482: this is the function that changes the
@@ -18,55 +27,24 @@ from gym import wrappers, logger
 # have to adjust this for the mountain car task
 ################################################
 
+def discretize_state( x, xdot, xRes, xdotRes ):
+    # Return -1 for out of bounds state
+    if X_MIN > x > X_MAX:
+        return OUTOFBOUNDSTATE
 
-def discretize_state( x, xdot, theta, thetadot ):
-    one_degree = 0.0174532
-    six_degrees = 0.1047192
-    twelve_degrees = 0.2094384
-    fifty_degrees = 0.87266
+    if XDOT_MIN > xdot > XDOT_MAX:
+        return OUTOFBOUNDSTATE
 
-    box = 0
-    if x < -2.4 or x > 2.4 or theta < -twelve_degrees or theta > twelve_degrees:
-        return -1
+    #loops over all possible x states and returns the box it belongs to.  
+    s_x = discretize_state_helper(x, xRes, X_MAX, X_MIN, X_RANGE);
+    s_y = discretize_state_helper(xdot, xdotRes, XDOT_MAX, XDOT_MIN, XDOT_RANGE)
+    return s_x * xdotRes + s_y
 
-    if x < -0.08:
-        box = 0
-    elif x < 0.08:
-        box = 1
-    else:
-        box = 2
 
-    box *= 3
-    if xdot < -0.5:
-        box += 0
-    elif xdot < 0.5:
-        box +=1
-    else:
-        box +=2
-
-    box *= 6
-    if theta < -six_degrees:
-        box += 0
-    if theta < -one_degree:
-        box += 1
-    elif theta < 0:
-        box += 2
-    elif theta < one_degree:
-        box += 3
-    elif theta < six_degrees:
-        box += 4
-    else:
-        box += 5
-
-    box *= 3
-    if thetadot < -fifty_degrees:
-        box += 0
-    elif thetadot < fifty_degrees:
-        box += 1
-    else:
-        box += 2
-
-    return box
+def discretize_state_helper( val, res, maxi, mini, rng ):
+    for box in range(res):
+        if val < ( rng*(1+box)/res + mini ): 
+            return box
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=None)
@@ -75,7 +53,7 @@ if __name__ == '__main__':
     # CS482: This is the line you'll have to
     # change to switch to the mountain car task
     ############################################
-    parser.add_argument('env_id', nargs='?', default='CartPole-v0', help='Select the environment to run')
+    parser.add_argument('env_id', nargs='?', default='MountainCar-v0', help='Select the environment to run')
     args = parser.parse_args()
 
     logger = logging.getLogger()
@@ -101,7 +79,7 @@ if __name__ == '__main__':
     ############################################
 
 
-    Q = np.zeros([162, env.action_space.n])
+    Q = np.zeros([41, env.action_space.n])
 
     ############################################
     # CS482: Here are some of the RL parameters
@@ -111,6 +89,10 @@ if __name__ == '__main__':
 
     alpha = 0.7  
     gamma = 0.97
+    
+    #Resolution variables for state space   
+    xres = 10
+    xdotres = 4    
 
     n_episodes = 50001
     for episode in range(n_episodes):
@@ -118,7 +100,7 @@ if __name__ == '__main__':
         reward = 0
         done = False
         state = env.reset()
-        s = discretize_state(state[0], state[1], state[2], state[3])
+        s = discretize_state(state[0], state[1], xres, xdotres )
         while done != True:
             tick += 1
             action = 0
@@ -129,20 +111,19 @@ if __name__ == '__main__':
                     ri = Q[s][q]
             state, reward, done, info = env.step(action)
             #print( reward, done)
-            sprime = discretize_state(state[0], state[1], state[2], state[3])
+            sprime = discretize_state(state[0], state[1], xres, xdotres )
             predicted_value = np.max(Q[sprime])
             if sprime < 0:
                 predicted_value = 0
                 reward = -5
-            #Q[s, action] += 0    
-            #Q[s,action] += (1-alpha)*Q[s,action] + alpha*(ri + gamma*predicted_value) #implement equation here.
+            
             Q[s,action] += alpha*(reward + gamma*predicted_value - Q[s,action])
             #print(Q[s,action], ri, sprime, Q[s][action])
             s = sprime
 
         if episode % 1000 == 0: 
             alpha *= .99 #decay rate for alpha, each 1000
-
+            print reward
         ############################################
         # CS482: When switching to the mountain car
         # task, you will have to change this to
@@ -150,8 +131,8 @@ if __name__ == '__main__':
         # car task
         ############################################
        
-        if tick < 199:
-            if episode % 1000 ==0:
-                print "fail ", tick
-        else:
+        if state[0] >= 0.5:
             print "success"
+        else:
+            if episode % 1000 ==0:
+                print "fail ", state[0], Q[s,action]
