@@ -27,6 +27,8 @@ XDOT_RANGE = 1.4
 # have to adjust this for the mountain car task
 ################################################
 
+# Function to descritize state, could potientially be parallelized with 
+# mapReduce technique
 def discretize_state( x, xdot, xRes, xdotRes ):
     # Return -1 for out of bounds state
     if X_MIN > x > X_MAX:
@@ -35,12 +37,13 @@ def discretize_state( x, xdot, xRes, xdotRes ):
     if XDOT_MIN > xdot > XDOT_MAX:
         return OUTOFBOUNDSTATE
 
-    #loops over all possible x states and returns the box it belongs to.  
-    s_x = discretize_state_helper(x, xRes, X_MAX, X_MIN, X_RANGE);
+    #Calculates x and y coordinates of state.  
+    s_x = discretize_state_helper(x, xRes, X_MAX, X_MIN, X_RANGE)
     s_y = discretize_state_helper(xdot, xdotRes, XDOT_MAX, XDOT_MIN, XDOT_RANGE)
+    #return flattened value which corresponds to unique index of state
     return s_x * xdotRes + s_y
 
-
+# Helper function that bins state variables and returns state in 1D
 def discretize_state_helper( val, res, maxi, mini, rng ):
     for box in range(res):
         if val < ( rng*(1+box)/res + mini ): 
