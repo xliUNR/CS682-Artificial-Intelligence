@@ -24,3 +24,15 @@ training -i <training file> -os <output spam probability file> -oh <output ham p
 classify  -i <dataset to be classified> -is <spam probability file> -ih <ham probability file>
 addtotraining -is <input spam probability file> -ih <input ham probability file> -s "<string>"
   
+# project 3
+
+Implement a kalman filter to estimate state of 1D robot that has position x and velocity xdot. Sensor output is position only.
+
+# project 4
+
+Implement Reinforcement learning, specifically Q-learning, using the OpenAI gym environment.
+First file cart.py is a solution to the cartpole balancing environment. Program learns how to balance pole on a cart for 200 ticks of time.
+Second file car.py is solution to mountain car. Program must learn how to get up a hill by rocking back and forth in a valley.
+
+
+  
